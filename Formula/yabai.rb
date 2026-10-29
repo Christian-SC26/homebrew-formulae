@@ -7,7 +7,7 @@ class Yabai < Formula
 
   resource "icon" do
     url "https://raw.githubusercontent.com/Christian-SC26/yabai/master/assets/icon/2x/icon-512px@2x.png"
-    sha256 "3acaa64372c7670a5c5df8ba5027b82dd02d289e1f6a46df3282bd46052f51b9"
+    sha256 "cde21dd6c23badfe46d70919641b8fcae6b7c9ce6d13e0552f1aa22df09a4414"
   end
 
   depends_on :macos => :big_sur
