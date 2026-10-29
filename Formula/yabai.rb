@@ -5,6 +5,11 @@ class Yabai < Formula
   sha256 "7804854e3e93a2711e43476fd7ad7ffebe234e9e7f6cf287a8eed3b65acc85ab"
   head "https://github.com/Christian-SC26/yabai.git"
 
+  resource "icon" do
+    url "https://raw.githubusercontent.com/Christian-SC26/yabai/master/assets/icon/2x/icon-512px@2x.png"
+    sha256 "cde21dd6c23badfe46d70919641b8fcae6b7c9ce6d13e0552f1aa22df09a4414"
+  end
+
   depends_on :macos => :big_sur
 
   def install
@@ -34,6 +39,34 @@ class Yabai < Formula
       (pkgshare/"examples").install "#{buildpath}/archive/examples/yabairc"
       (pkgshare/"examples").install "#{buildpath}/archive/examples/skhdrc" if File.exist?("#{buildpath}/archive/examples/skhdrc")
     end
+
+    if File.exist?("#{buildpath}/assets/icon/2x/icon-512px@2x.png")
+      (pkgshare/"icon").install "#{buildpath}/assets/icon/2x/icon-512px@2x.png"
+    elsif File.exist?("#{buildpath}/archive/assets/icon/2x/icon-512px@2x.png")
+      (pkgshare/"icon").install "#{buildpath}/archive/assets/icon/2x/icon-512px@2x.png"
+    else
+      resource("icon").stage do
+        (pkgshare/"icon").install "icon-512px@2x.png"
+      end
+    end
+  end
+
+  def post_install
+    icon_path = pkgshare/"icon/icon-512px@2x.png"
+    target_bin = bin/"yabai"
+    return unless File.exist?(icon_path) && File.exist?(target_bin)
+
+    system "chmod", "+w", target_bin
+    system "/usr/bin/swift", "-e", <<~SWIFT, icon_path.to_s, target_bin.to_s
+      import AppKit
+      if CommandLine.arguments.count >= 3,
+         let img = NSImage(contentsOfFile: CommandLine.arguments[1]) {
+        _ = NSWorkspace.shared.setIcon(img, forFile: CommandLine.arguments[2], options: [])
+      }
+    SWIFT
+    system "chmod", "-w", target_bin
+  rescue => e
+    opoo "yabai: unable to set custom application icon: \#{e.message}"
   end
 
   def caveats
